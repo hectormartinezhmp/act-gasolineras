@@ -16,341 +16,155 @@
     <div id="app">
 
         <header class="header">
-
-            <span class="badge">
-                API REST carburantes
-            </span>
-
-            <h1>
-                Buscador de gasolineras
-            </h1>
-
-            <p>
-                Localiza estaciones cercanas y filtra
-                por carburante o marca.
-            </p>
-
+            <span class="badge">API REST carburantes</span>
+            <h1>Buscador de gasolineras</h1>
+            <p>Localiza estaciones cercanas y filtra por carburante o marca.</p>
         </header>
 
         <main class="layout">
 
             <section class="panel">
-
                 <h2>Búsqueda</h2>
 
                 <div class="form-group">
-
-                    <label for="radius">
-                        Radio de búsqueda
-                    </label>
-
+                    <label for="radius">Radio de búsqueda</label>
                     <div class="input-unit">
-
-                        <input
-                            id="radius"
-                            v-model="radius"
-                            type="number"
-                            min="1"
-                        >
-
+                        <input id="radius" v-model="radius" type="number" min="1">
                         <span>km</span>
-
                     </div>
-
                 </div>
 
-                <button
-                    class="btn-primary"
-                    @click="getLocation"
-                    :disabled="loading"
-                >
+                <button class="btn-primary" @click="getLocation" :disabled="loading">
                     📍 Usar mi ubicación
                 </button>
 
-                <button
-                    class="btn-secondary"
-                    @click="searchGasStations"
-                    :disabled="loading"
-                >
-                    {{
-                        loading
-                        ? 'Buscando...'
-                        : 'Buscar gasolineras'
-                    }}
+                <button class="btn-secondary" @click="searchGasStations" :disabled="loading">
+                    {{ loading ? 'Buscando...' : 'Buscar gasolineras' }}
                 </button>
 
-                <button
-                    class="btn-link"
-                    @click="showManualCoordinates = !showManualCoordinates"
-                >
-                    {{
-                        showManualCoordinates
-                        ? 'Ocultar opciones avanzadas'
-                        : 'Mostrar opciones avanzadas'
-                    }}
+                <button class="btn-link" @click="showManualCoordinates = !showManualCoordinates">
+                    {{ showManualCoordinates ? 'Ocultar opciones avanzadas' : 'Mostrar opciones avanzadas' }}
                 </button>
 
-                <div
-                    v-if="showManualCoordinates"
-                    class="advanced-box"
-                >
-
+                <div v-if="showManualCoordinates" class="advanced-box">
                     <div class="form-group">
-
-                        <label for="latitude">
-                            Latitud
-                        </label>
-
-                        <input
-                            id="latitude"
-                            v-model="latitude"
-                            type="number"
-                            step="0.0001"
-                        >
-
+                        <label for="latitude">Latitud</label>
+                        <input id="latitude" v-model="latitude" type="number" step="0.0001">
                     </div>
 
                     <div class="form-group">
-
-                        <label for="longitude">
-                            Longitud
-                        </label>
-
-                        <input
-                            id="longitude"
-                            v-model="longitude"
-                            type="number"
-                            step="0.0001"
-                        >
-
+                        <label for="longitude">Longitud</label>
+                        <input id="longitude" v-model="longitude" type="number" step="0.0001">
                     </div>
-
                 </div>
 
-                <div
-                    v-if="searched && allStations.length > 0"
-                    class="filters"
-                >
-
+                <div v-if="searched && allStations.length > 0" class="filters">
                     <h2>Filtros</h2>
 
                     <div class="form-group">
-
-                        <label for="fuel">
-                            Carburante
-                        </label>
-
-                        <select
-                            id="fuel"
-                            v-model="selectedFuel"
-                            @change="applyFilters"
-                        >
-
-                            <option value="">
-                                Todos
-                            </option>
-
-                            <option value="Gasolina 95">
-                                Gasolina 95
-                            </option>
-
-                            <option value="Gasolina 98">
-                                Gasolina 98
-                            </option>
-
-                            <option value="Diésel">
-                                Diésel
-                            </option>
-
-                            <option value="Diésel+">
-                                Diésel Premium
-                            </option>
-
+                        <label for="sortBy">Ordenar por</label>
+                        <select id="sortBy" v-model="sortBy" @change="applyFilters">
+                            <option value="distance">Más cercanas</option>
+                            <option value="priceG95">Más baratas (Gasolina 95)</option>
+                            <option value="priceDiesel">Más baratas (Diésel)</option>
                         </select>
-
                     </div>
 
                     <div class="form-group">
-
-                        <label for="brand">
-                            Marca
-                        </label>
-
-                        <select
-                            id="brand"
-                            v-model="brandFilter"
-                            @change="applyFilters"
-                        >
-
-                            <option value="">
-                                Todas
-                            </option>
-
-                            <option
-                                v-for="brand in brands"
-                                :key="brand"
-                                :value="brand"
-                            >
-                                {{ brand }}
-                            </option>
-
+                        <label for="fuel">Carburante</label>
+                        <select id="fuel" v-model="selectedFuel" @change="applyFilters">
+                            <option value="">Todos</option>
+                            <option value="Gasolina 95">Gasolina 95</option>
+                            <option value="Gasolina 98">Gasolina 98</option>
+                            <option value="Diésel">Diésel</option>
+                            <option value="Diésel+">Diésel Premium</option>
                         </select>
-
                     </div>
 
+                    <div class="form-group">
+                        <label for="brand">Marca</label>
+                        <select id="brand" v-model="brandFilter" @change="applyFilters">
+                            <option value="">Todas</option>
+                            <option v-for="brand in brands" :key="brand" :value="brand">
+                                {{ brand }}
+                            </option>
+                        </select>
+                    </div>
                 </div>
-
             </section>
 
             <section class="results-panel">
-
                 <div class="results-header">
                     <h2>Resultados</h2>
                     <div class="view-toggle" v-if="gasStations.length > 0">
-                        <button
-                            :class="['toggle-btn', { active: viewMode === 'list' }]"
-                            @click="setViewMode('list')"
-                        >
+                        <button :class="['toggle-btn', { active: viewMode === 'list' }]" @click="setViewMode('list')">
                             Listado
                         </button>
-                        <button
-                            :class="['toggle-btn', { active: viewMode === 'map' }]"
-                            @click="setViewMode('map')"
-                        >
+                        <button :class="['toggle-btn', { active: viewMode === 'map' }]" @click="setViewMode('map')">
                             Mapa
                         </button>
                     </div>
                 </div>
 
-                <div
-                    v-if="error"
-                    class="message error"
-                >
-                    {{ error }}
-                </div>
+                <div v-if="error" class="message error">{{ error }}</div>
+                <div v-if="loading" class="message loading">Cargando datos...</div>
 
-                <div
-                    v-if="loading"
-                    class="message loading"
-                >
-                    Cargando datos...
-                </div>
+                <div v-if="gasStations.length > 0" class="results" v-show="viewMode === 'list'">
+                    <p class="message info">Se encontraron {{ gasStations.length }} gasolineras</p>
 
-                <div
-                    v-if="gasStations.length > 0"
-                    class="results"
-                    v-show="viewMode === 'list'"
-                >
-
-                    <p class="message info">
-                        Se encontraron
-                        {{ gasStations.length }}
-                        gasolineras
-                    </p>
-
-                    <article
-                        v-for="(station, index) in gasStations"
-                        :key="index"
-                        class="station-card"
-                    >
-
-                        <div class="station-top">
-
+                    <article v-for="(station, index) in gasStations" :key="index" class="station-card">
+						<div class="station-top">
                             <div>
+                                <span 
+                                    class="status-badge" 
+                                    :class="{
+                                        'status-open': checkIfOpen(station.horario) === 'open',
+                                        'status-closed': checkIfOpen(station.horario) === 'closed',
+                                        'status-unknown': checkIfOpen(station.horario) === 'unknown'
+                                    }"
+                                >
+                                    {{ 
+                                        checkIfOpen(station.horario) === 'open' ? '🟢 Abierto ahora' : 
+                                        checkIfOpen(station.horario) === 'closed' ? '🔴 Cerrado ahora' : 
+                                        '⚪ Horario desconocido' 
+                                    }}
+                                </span>
 
-                                <h3>
-                                    {{ station.nombre }}
-                                </h3>
-
-                                <p>
-                                    {{ station.direccion }}
-                                </p>
-
+                                <h3>{{ station.nombre }}</h3>
+                                <p>{{ station.direccion }}</p>
                             </div>
-
-                            <span class="distance">
-                                {{ station.distancia.toFixed(2) }} km
-                            </span>
-
+                            <span class="distance">{{ station.distancia.toFixed(2) }} km</span>
                         </div>
 
                         <div class="station-info">
-
-                            <p>
-                                <strong>Empresa:</strong>
-                                {{ station.empresa }}
-                            </p>
-
-                            <p>
-                                <strong>Municipio:</strong>
-                                {{ station.municipio }}
-                            </p>
-
-                            <p>
-                                <strong>Horario:</strong>
-                                {{ station.horario }}
-                            </p>
-
+                            <p><strong>Empresa:</strong> {{ station.empresa }}</p>
+                            <p><strong>Municipio:</strong> {{ station.municipio }}</p>
+                            <p><strong>Horario:</strong> {{ station.horario }}</p>
                         </div>
 
                         <div class="prices">
-
-                            <span v-if="station.gasolina95">
-                                Gasolina 95 ·
-                                {{ station.gasolina95 }} €/L
-                            </span>
-
-                            <span v-if="station.gasolina98">
-                                Gasolina 98 ·
-                                {{ station.gasolina98 }} €/L
-                            </span>
-
-                            <span v-if="station.diesel">
-                                Diésel ·
-                                {{ station.diesel }} €/L
-                            </span>
-
-                            <span v-if="station.dieselPremium">
-                                Diésel Premium ·
-                                {{ station.dieselPremium }} €/L
-                            </span>
-
+                            <span v-if="station.gasolina95">Gasolina 95 · {{ station.gasolina95 }} €/L</span>
+                            <span v-if="station.gasolina98">Gasolina 98 · {{ station.gasolina98 }} €/L</span>
+                            <span v-if="station.diesel">Diésel · {{ station.diesel }} €/L</span>
+                            <span v-if="station.dieselPremium">Diésel Premium · {{ station.dieselPremium }} €/L</span>
                         </div>
-
                     </article>
-
                 </div>
 
-                <div
-                    v-if="gasStations.length > 0"
-                    v-show="viewMode === 'map'"
-                    id="map-container"
-                ></div>
+                <div v-if="gasStations.length > 0" v-show="viewMode === 'map'" id="map-container"></div>
 
-                <div
-                    v-else-if="!loading && searched"
-                    class="empty"
-                >
-                    No se encontraron gasolineras
-                    dentro del radio indicado.
+                <div v-else-if="!loading && searched" class="empty">
+                    No se encontraron gasolineras dentro del radio indicado.
                 </div>
-
-                <div
-                    v-else-if="!loading"
-                    class="empty"
-                >
-                    Pulsa "Usar mi ubicación"
-                    o "Buscar gasolineras" para empezar.
+                <div v-else-if="!loading" class="empty">
+                    Pulsa "Usar mi ubicación" o "Buscar gasolineras" para empezar.
                 </div>
-
             </section>
 
         </main>
-
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
-
 </body>
 </html>
